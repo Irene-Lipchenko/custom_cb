@@ -1,0 +1,68 @@
+<?php
+/**
+ * @file
+ * displays different image styles for image field according to taxonomy field value
+ *
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function custom_cb_init() {
+  $q = $_GET['q'];
+  $q_args = explode('/', $q);
+  $node_id = end($q_args);
+
+  if (count($q_args) == 2 && $q_args[0] == 'node'){
+    //загружаем ноду целиком
+    $node = node_load($q_args[1]);
+
+    //проверяем к ней наличие taxonomy_menu
+    if (_taxonomy_menu_get_node_terms($node)){         //если ок. идем дальше
+      //по 'Logos' определяем нужный нам vocabulary_machine_name и tid, т.к. и все остальные (Sites, Design etc.) будут относиться к этому же словарю
+      $term = taxonomy_get_term_by_name('logos');
+      $term = current($term);
+
+      $vocabulary = $term->vocabulary_machine_name;
+      $logos_tid  = $term->tid;
+
+      //далее смотрим vocabulary_machine_name для текущей ноды
+
+      $curr_tid = current(_taxonomy_menu_get_node_terms($node));
+      $curr_term = taxonomy_term_load($curr_tid);
+      $curr_vocabulary = $curr_term->vocabulary_machine_name;
+
+      //если текущая нода имеет тот же словарь, что и Logos, продолжаем
+      if ($vocabulary == $curr_vocabulary){
+        //проверяем, лого это или нет
+        if ($logos_tid == $curr_tid){
+          echo '<b>ORIGINAL IMAGE</b>';
+          $image_style = 'none';
+        } else {
+          echo '<b>LARGE IMAGE</b>';
+          $image_style = 'large';
+        }
+
+        //variable_set('colorbox_image_style', $image_style);
+
+        //$test = variable_get('')
+
+        drupal_alter('colorbox_image_style', &$image_style);
+
+        //теперь формируем данные для хука custom_cb_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display)
+        /*$entity_type = 'node';
+        $entity = $node;
+        $field = custom_cb_field_
+        $instance = '';
+        $langcode = 'und';
+        $items = '';
+        $display = '';
+
+        dpm($field);*/
+      }
+    }
+
+    //dpm($node);
+  }
+}
+

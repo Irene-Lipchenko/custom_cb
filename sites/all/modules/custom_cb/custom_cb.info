@@ -1,0 +1,5 @@
+name = Custom Colorbox
+description = "Display different image styles for image field according to taxonomy field value"
+package = Colorbox
+core = 7.x
+files[] = custom_cb.module
